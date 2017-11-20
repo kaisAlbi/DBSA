@@ -9,10 +9,8 @@
 #define fileGen_hpp
 
 #include <random>
-#include <stdio.h>
 #include <cstdint>
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
 
 #endif /* fileGen_hpp */
