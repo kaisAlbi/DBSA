@@ -1,0 +1,82 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXFileReference section */
+		F1CE6C951FC2F9EA00FB1C87 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		F1CE6C961FC2F9EA00FB1C87 /* main.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = main.hpp; sourceTree = "<group>"; };
+		F1CE6C971FC2FBAA00FB1C87 /* InputStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputStream.cpp; sourceTree = "<group>"; };
+		F1CE6C981FC2FBAA00FB1C87 /* InputStream.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InputStream.hpp; sourceTree = "<group>"; };
+		F1CE6C991FC2FBCA00FB1C87 /* OutputStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OutputStream.cpp; sourceTree = "<group>"; };
+		F1CE6C9A1FC2FBCA00FB1C87 /* OutputStream.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutputStream.hpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		F1CE6C8E1FC2F9CF00FB1C87 = {
+			isa = PBXGroup;
+			children = (
+				F1CE6C961FC2F9EA00FB1C87 /* main.hpp */,
+				F1CE6C951FC2F9EA00FB1C87 /* main.cpp */,
+				F1CE6C981FC2FBAA00FB1C87 /* InputStream.hpp */,
+				F1CE6C971FC2FBAA00FB1C87 /* InputStream.cpp */,
+				F1CE6C9A1FC2FBCA00FB1C87 /* OutputStream.hpp */,
+				F1CE6C991FC2FBCA00FB1C87 /* OutputStream.cpp */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		F1CE6C8F1FC2F9CF00FB1C87 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0900;
+			};
+			buildConfigurationList = F1CE6C921FC2F9CF00FB1C87 /* Build configuration list for PBXProject "DBSA" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F1CE6C8E1FC2F9CF00FB1C87;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		F1CE6C931FC2F9CF00FB1C87 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		F1CE6C941FC2F9CF00FB1C87 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F1CE6C921FC2F9CF00FB1C87 /* Build configuration list for PBXProject "DBSA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F1CE6C931FC2F9CF00FB1C87 /* Debug */,
+				F1CE6C941FC2F9CF00FB1C87 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F1CE6C8F1FC2F9CF00FB1C87 /* Project object */;
+}
