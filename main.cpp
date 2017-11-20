@@ -12,7 +12,6 @@
 using namespace std;
 
 int main(){
-    cout << "running.." << endl;
     InputStream i_stream;
     OutputStream o_stream;
     
@@ -21,7 +20,10 @@ int main(){
     i_stream.read_next();
     bool end = i_stream.end_of_stream();
     
-    cout << "should be false : " << end << endl;
+    // testing output stream
+    o_stream.create("new_file");
+    o_stream.write(104);
+    o_stream.close();
     
     return 1;
 }
