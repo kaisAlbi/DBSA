@@ -7,12 +7,14 @@
 
 #include "main.hpp"
 #include "InputStream.cpp"
+#include "OutputStream.cpp"
 
 using namespace std;
 
 int main(){
     cout << "running.." << endl;
     InputStream i_stream;
+    OutputStream o_stream;
     
     // testing input stream
     i_stream.open();
