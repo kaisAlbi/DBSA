@@ -8,7 +8,7 @@
 #include "InputStream.hpp"
 
 class InputStream {
-    std::list<uint32_t> stream;
+    std::list<int32_t> stream;
     std::string _file;
     bool _EOS;
     

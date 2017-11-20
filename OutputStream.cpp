@@ -11,10 +11,10 @@
 class OutputStream {
     int _used_method;
     
-    void _write1(uint32_t);
-    void _write2(uint32_t);
-    void _write3(uint32_t);
-    void _write4(uint32_t);
+    void _write1(int32_t);
+    void _write2(int32_t);
+    void _write3(int32_t);
+    void _write4(int32_t);
 
 public:
     // getters
@@ -25,7 +25,7 @@ public:
     
     // required functions
     void create(std::string);
-    void write(uint32_t);
+    void write(int32_t);
     void close();
 };
 // getters
@@ -43,19 +43,19 @@ void OutputStream::create(std::string file_name) {
     std::cout << "creating file withe file name : " << file_name << std::endl;
 }
 
-void OutputStream::_write1(uint32_t value) {
+void OutputStream::_write1(int32_t value) {
 }
 
-void OutputStream::_write2(uint32_t value) {
+void OutputStream::_write2(int32_t value) {
 }
 
-void OutputStream::_write3(uint32_t value) {
+void OutputStream::_write3(int32_t value) {
 }
 
-void OutputStream::_write4(uint32_t value) {
+void OutputStream::_write4(int32_t value) {
 }
 
-void OutputStream::write(uint32_t value) {
+void OutputStream::write(int32_t value) {
     std::cout << "writing value " << value << " to the stream" << std::endl;
     
     switch (this->getUsedMethod()) {
