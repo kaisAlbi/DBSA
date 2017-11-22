@@ -8,6 +8,7 @@
 #include "main.hpp"
 #include "InputStream.cpp"
 #include "OutputStream.cpp"
+#include "diskFiles/fileGen.cpp"
 
 using namespace std;
 
@@ -16,7 +17,8 @@ int main(){
     OutputStream o_stream;
     
     // testing input stream
-    i_stream.open();
+    i_stream.open("test1.txt");
+    i_stream.read_next();
     i_stream.read_next();
     bool end = i_stream.end_of_stream();
     
@@ -24,6 +26,9 @@ int main(){
     o_stream.create("new_file");
     o_stream.write(104);
     o_stream.close();
+    
+    // file_gen test
+    fileGen(10, "test.txt");
     
     return 1;
 }

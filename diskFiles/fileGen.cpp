@@ -38,8 +38,3 @@ public:
 		outputFile.close();
 	}	
 };
-
-//Test
-int main(){
-	fileGen(10, "test.txt");
-}

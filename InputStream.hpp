@@ -13,5 +13,7 @@
 #include <list>
 #include <iostream>
 #include <unistd.h>
+#include <fcntl.h>
+//#include <fstream>
 
 #endif /* InputStream_hpp */
