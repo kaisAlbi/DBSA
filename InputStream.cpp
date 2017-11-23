@@ -106,18 +106,23 @@ void InputStream::open(std::string file_to_open) {
 }
 
 void InputStream::_read1() {
+    /*
+     read using unistd read function
+     */
 
-    char ch;
+    char read_ch;
     std::string buffered;
-    bool stop = false;
     
-    /* CAN'T READ MINUS .. */
-    while(read(_getFD(), &ch, 1) > 0 and !_getStopSignal()) {
-        if(ch == '\n'){
+    if (ch) {
+        buffered += read_ch;
+    }
+    
+    while(read(_getFD(), &read_ch, 1) > -1 and !_getStopSignal()) {
+        if(read_ch == '\n'){
             _flagStop();
         }
         else {
-            buffered += ch;
+            buffered += read_ch;
         }
     }
     
@@ -125,6 +130,9 @@ void InputStream::_read1() {
 }
 
 void InputStream::_read2() {
+    /*
+     read using stdio fread function
+     */
     char* buffer;
     size_t size = 32;
     size_t to_count = 1;
