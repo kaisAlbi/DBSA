@@ -10,6 +10,7 @@
 class InputStream {
     std::list<int32_t> stream;
     std::string _file;
+    std::ifstream _inputFile;
     bool _EOS;
     
     int _used_method;
@@ -70,6 +71,7 @@ void InputStream::setUsedMethod(int method_number) {
 // required functions
 void InputStream::open() {
     std::cout << "opening file" << std::endl;
+	_inputFile.open(_file, std::ios::binary | std::ios::in);
 }
 
 void InputStream::_read1() {
@@ -102,6 +104,9 @@ void InputStream::_read4() {
 
 void InputStream::read_next() {
     std::cout << "reading next 32-bit" << std::endl;
+    int32_t next_int;
+    _inputFile.read(reinterpret_cast<char*> (&next_int), 32);
+    std::cout << "Read number from file : " << next_int << std::endl;
     
     switch (this->getUsedMethod()) {
         case 1:

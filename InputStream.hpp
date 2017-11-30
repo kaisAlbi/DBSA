@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <list>
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 
 #endif /* InputStream_hpp */
