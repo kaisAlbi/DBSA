@@ -17,7 +17,7 @@ public:
 										_length(length), _path(path){
 		//Opening output stream
 		std::ofstream outputFile;
-		outputFile.open(_path);
+		outputFile.open(_path, std::ios::out | std::ios::binary);
 		
 		//Source : https://stackoverflow.com/a/22883968
 		std::random_device rd;     	//Get a random seed from the OS entropy device, or whatever
@@ -32,8 +32,8 @@ public:
 		std::uniform_int_distribution<int32_t> distr(int32min,int32max);
 		for(std::size_t i = 0; i < _length; ++i){
 			//Writing in file
-			outputFile << distr(eng);
-			outputFile << std::endl;
+			int32_t res = distr(eng);
+			outputFile.write(reinterpret_cast<const char *>(&res), 32);
 		};
 		outputFile.close();
 	}	
@@ -41,5 +41,5 @@ public:
 
 //Test
 int main(){
-	fileGen(10, "test.txt");
+	fileGen(10, "test.bin");
 }
