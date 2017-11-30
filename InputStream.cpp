@@ -11,10 +11,21 @@ class InputStream {
     std::list<int32_t> stream;
     std::string _file;
     std::ifstream _inputFile;
+    int _fd;
     bool _EOS;
+    bool _stop;
     
     int _used_method;
     
+    // private getters
+    int _getFD();
+    bool _getStopSignal();
+    
+    // private setters
+    void _flagStart();
+    void _flagStop();
+    
+    // private reads
     void _read1();
     void _read2();
     void _read3();
@@ -34,7 +45,7 @@ public:
     void setUsedMethod(int);
     
     // required functions
-    void open();
+    void open(std::string);
     void read_next();
     bool end_of_stream();
 };
@@ -43,7 +54,17 @@ public:
 InputStream::InputStream() {
     this->setOpenFile("none");
     this->_EOS = false;
+    this->_stop = false;
     this->_used_method = 1;
+}
+
+// private getters
+int InputStream::_getFD() {
+    return _fd;
+}
+
+bool InputStream::_getStopSignal() {
+    return _stop;
 }
 
 // getters
@@ -53,6 +74,15 @@ std::string InputStream::getOpenFile() {
 
 int InputStream::getUsedMethod() {
     return this->_used_method;
+}
+
+// private setters
+void InputStream::_flagStart() {
+    _stop = false;
+}
+
+void InputStream::_flagStop() {
+    _stop = true;
 }
 
 // setters
@@ -69,23 +99,42 @@ void InputStream::setUsedMethod(int method_number) {
 }
 
 // required functions
-void InputStream::open() {
-    std::cout << "opening file" << std::endl;
-	_inputFile.open(_file, std::ios::binary | std::ios::in);
+void InputStream::open(std::string file_to_open) {
+    std::cout << "opening file : " << file_to_open << std::endl;
+    _inputFile.open(_file, std::ios::binary | std::ios::in);
+    this->_file = file_to_open;
+    this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
+    std::cout << "obtained FD : " << _getFD() << std::endl;
 }
 
 void InputStream::_read1() {
-    char* buffer;
-    int file_descriptor = 0;
-    size_t to_count = 32;
+    /*
+     read using unistd read function
+     */
+
+    char read_ch;
+    std::string buffered;
     
-    // FORM : ssize_t read(int fd, void *buf, size_t count);
-    //ssize_t read_bytes = read(file_descriptor, buffer, to_count);
-    //std::cout << "buffer : " << buffer << std::endl;
-    std::cout << "1 : read !" << std::endl;
+    if (ch) {
+        buffered += read_ch;
+    }
+    
+    while(read(_getFD(), &read_ch, 1) > -1 and !_getStopSignal()) {
+        if(read_ch == '\n'){
+            _flagStop();
+        }
+        else {
+            buffered += read_ch;
+        }
+    }
+    
+    std::cout << "read method 1 : " << buffered << std::endl;
 }
 
 void InputStream::_read2() {
+    /*
+     read using stdio fread function
+     */
     char* buffer;
     size_t size = 32;
     size_t to_count = 1;
@@ -107,6 +156,7 @@ void InputStream::read_next() {
     int32_t next_int;
     _inputFile.read(reinterpret_cast<char*> (&next_int), 32);
     std::cout << "Read number from file : " << next_int << std::endl;
+    _flagStart();
     
     switch (this->getUsedMethod()) {
         case 1:
