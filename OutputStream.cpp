@@ -11,6 +11,9 @@
 class OutputStream {
     int _used_method;
     
+    std::ofstream _outputFile;
+    
+    void _classicWrite(int32_t);
     void _write1(int32_t);
     void _write2(int32_t);
     void _write3(int32_t);
@@ -41,6 +44,13 @@ void OutputStream::setUsedMethod(int new_method) {
 // required functions
 void OutputStream::create(std::string file_name) {
     std::cout << "creating file withe file name : " << file_name << std::endl;
+    _outputFile.open(file_name, std::ios::out | std::ios::binary);
+}
+
+// classic write in binary file
+void OutputStream::_classicWrite(int32_t value){
+	size_t sizeOfInt = sizeof(int32_t); //32 bits
+	_outputFile.write(reinterpret_cast<const char *>(&value), sizeOfInt); 
 }
 
 void OutputStream::_write1(int32_t value) {

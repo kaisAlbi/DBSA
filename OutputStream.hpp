@@ -9,5 +9,7 @@
 #define OutputStream_hpp
 
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 
 #endif /* OutputStream_hpp */
