@@ -18,15 +18,16 @@ int main(){
     
     
     // testing output stream
-    o_stream.create("new_file.bin");
-    o_stream.write(104);
+    o_stream.create("new_file.dat");
+    o_stream.setUsedMethod(1);
+    o_stream.write(20000);
     o_stream.close();
     
     // testing input stream
-    i_stream.open("new_file.bin");
+    i_stream.open("new_file.dat");
     i_stream.read_next();
     //i_stream.read_next();
-    bool end = i_stream.end_of_stream();
+    //bool end = i_stream.end_of_stream();
     
     // file_gen test
     fileGen(10, "test.txt");

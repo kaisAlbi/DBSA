@@ -101,7 +101,7 @@ void InputStream::setUsedMethod(int method_number) {
 // required functions
 void InputStream::open(std::string file_to_open) {
     std::cout << "opening file : " << file_to_open << std::endl;
-    _inputFile.open(_file, std::ios::binary | std::ios::in);
+    _inputFile.open(file_to_open, std::ios::binary | std::ios::in);
     this->_file = file_to_open;
     this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
     std::cout << "obtained FD : " << _getFD() << std::endl;
@@ -111,7 +111,8 @@ void InputStream::_read1() {
     /*
      read using unistd read function
      */
-
+    
+    /*
     char read_ch;
     std::string buffered;
     
@@ -129,6 +130,7 @@ void InputStream::_read1() {
     }
     
     std::cout << "read method 1 : " << buffered << std::endl;
+     */
 }
 
 void InputStream::_read2() {
