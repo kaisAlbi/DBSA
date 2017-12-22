@@ -115,7 +115,7 @@ void InputStream::_read1() {
     char read_ch;
     std::string buffered;
     
-    if (ch) {
+    if (read_ch) {
         buffered += read_ch;
     }
     
