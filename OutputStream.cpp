@@ -10,14 +10,15 @@
 
 class OutputStream {
     int _used_method;
+    int _fd;
     
-    std::ofstream _outputFile;
-    
-    void _classicWrite(int32_t);
     void _write1(int32_t);
     void _write2(int32_t);
     void _write3(int32_t);
     void _write4(int32_t);
+    
+    // private getters
+    int _getFD();
 
 public:
     // getters
@@ -31,6 +32,12 @@ public:
     void write(int32_t);
     void close();
 };
+
+// private getters
+int OutputStream::_getFD() {
+    return _fd;
+}
+
 // getters
 int OutputStream::getUsedMethod() {
     return _used_method;
@@ -51,18 +58,13 @@ void OutputStream::setUsedMethod(int new_method) {
 // required functions
 void OutputStream::create(std::string file_name) {
     std::cout << "creating file withe file name : " << file_name << std::endl;
-    _outputFile.open(file_name, std::ios::out | std::ios::binary);
+    this->_fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
+    std::cout << "obtained FD" << this->_fd << std::endl;
 }
 
 // classic write in binary file
-void OutputStream::_classicWrite(int32_t value){
-    std::cout << "executing classic write .." << std::endl;
-	size_t sizeOfInt = sizeof(int32_t); //32 bits
-	_outputFile.write(reinterpret_cast<const char *>(&value), 32); 
-}
-
 void OutputStream::_write1(int32_t value) {
-    this->_classicWrite(value);
+    ::write(this->_getFD(), &value, sizeof(value));
 }
 
 void OutputStream::_write2(int32_t value) {
@@ -83,6 +85,7 @@ void OutputStream::write(int32_t value) {
             this->_write1(value);
             break;
         case 2:
+            std::cout << "method 2 chosen .. " << std::endl;
             this->_write2(value);
             break;
         case 3:
@@ -96,5 +99,6 @@ void OutputStream::write(int32_t value) {
 
 void OutputStream::close() {
     std::cout << "closing stream" << std::endl;
+    ::close(this->_getFD());
 }
 

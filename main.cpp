@@ -19,8 +19,10 @@ int main(){
     
     // testing output stream
     o_stream.create("new_file.dat");
-    o_stream.setUsedMethod(1);
-    o_stream.write(20000);
+    o_stream.setUsedMethod(2);
+    o_stream.write(1000);
+    //o_stream.write(20000);
+    //o_stream.write(40000);
     o_stream.close();
     
     // testing input stream
@@ -28,6 +30,7 @@ int main(){
     i_stream.read_next();
     //i_stream.read_next();
     //bool end = i_stream.end_of_stream();
+    //i_stream.close();
     
     // file_gen test
     fileGen(10, "test.txt");

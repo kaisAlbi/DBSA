@@ -10,7 +10,6 @@
 class InputStream {
     std::list<int32_t> stream;
     std::string _file;
-    std::ifstream _inputFile;
     int _fd;
     bool _EOS;
     bool _stop;
@@ -48,6 +47,8 @@ public:
     void open(std::string);
     void read_next();
     bool end_of_stream();
+    
+    void close();
 };
 
 // constructors
@@ -101,7 +102,6 @@ void InputStream::setUsedMethod(int method_number) {
 // required functions
 void InputStream::open(std::string file_to_open) {
     std::cout << "opening file : " << file_to_open << std::endl;
-    _inputFile.open(file_to_open, std::ios::binary | std::ios::in);
     this->_file = file_to_open;
     this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
     std::cout << "obtained FD : " << _getFD() << std::endl;
@@ -111,38 +111,15 @@ void InputStream::_read1() {
     /*
      read using unistd read function
      */
-    
-    /*
-    char read_ch;
-    std::string buffered;
-    
-    if (read_ch) {
-        buffered += read_ch;
-    }
-    
-    while(read(_getFD(), &read_ch, 1) > -1 and !_getStopSignal()) {
-        if(read_ch == '\n'){
-            _flagStop();
-        }
-        else {
-            buffered += read_ch;
-        }
-    }
-    
-    std::cout << "read method 1 : " << buffered << std::endl;
-     */
+    int32_t res;
+    read(this->_getFD(), &res, sizeof(res));
+    std::cout << "read : " << res << std::endl;
 }
 
 void InputStream::_read2() {
     /*
      read using stdio fread function
      */
-    char* buffer;
-    size_t size = 32;
-    size_t to_count = 1;
-    FILE* stream;
-    
-    // FORM : size_t fread ( void * ptr, size_t size, size_t count, FILE * stream );
 }
 
 void InputStream::_read3() {
@@ -154,10 +131,6 @@ void InputStream::_read4() {
 }
 
 void InputStream::read_next() {
-    std::cout << "reading next 32-bit" << std::endl;
-    int32_t next_int;
-    _inputFile.read(reinterpret_cast<char*> (&next_int), 32);
-    std::cout << "Read number from file : " << next_int << std::endl;
     _flagStart();
     
     switch (this->getUsedMethod()) {
@@ -178,4 +151,8 @@ void InputStream::read_next() {
 
 bool InputStream::end_of_stream() {
     return this->_EOS;
+}
+
+void InputStream::close() {
+    ::close(this->_getFD());
 }
