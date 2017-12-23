@@ -6,21 +6,25 @@
 //
 
 #include "InputStream.hpp"
+#define MAX_ITEMS 100
 
 class InputStream {
     std::list<int32_t> stream;
     std::string _file;
     int _fd;
     FILE* pFile;
+    int32_t buffer[MAX_ITEMS];
     bool _EOS;
     bool _stop;
     
     int _used_method;
+    int B;
     
     // private getters
     int _getFD();
     bool _getStopSignal();
     FILE* _getPFile();
+    int32_t* _getBuffer();
     
     // private setters
     void _flagStart();
@@ -35,10 +39,12 @@ class InputStream {
 public:
     // constructors
     InputStream();
+    InputStream(int B);
     
     // getters
     std::string getOpenFile();
     int getUsedMethod();
+    int getB();
     
     // setters
     void setOpenFile(std::string);
@@ -61,6 +67,11 @@ InputStream::InputStream() {
     this->_used_method = 1;
 }
 
+InputStream::InputStream(int B) {
+    InputStream();
+    this->B = B;
+}
+
 // private getters
 int InputStream::_getFD() {
     return _fd;
@@ -74,6 +85,10 @@ FILE* InputStream::_getPFile() {
     return pFile;
 }
 
+int32_t* InputStream::_getBuffer() {
+    return buffer;
+}
+
 // getters
 std::string InputStream::getOpenFile() {
     return this->_file;
@@ -81,6 +96,10 @@ std::string InputStream::getOpenFile() {
 
 int InputStream::getUsedMethod() {
     return this->_used_method;
+}
+
+int InputStream::getB() {
+    return this->B;
 }
 
 // private setters
@@ -114,7 +133,7 @@ void InputStream::setUsedMethod(int method_number) {
 // required functions
 void InputStream::open(std::string file_to_open) {
     switch (this->getUsedMethod()) {
-        case 1:
+        case 1 | 3:
             std::cout << "opening file : " << file_to_open << std::endl;
             this->_file = file_to_open;
             this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
@@ -149,6 +168,14 @@ void InputStream::_read2() {
 
 void InputStream::_read3() {
     // read1 + buffer of size B (increase buffer 32 bits to upwards)
+    int32_t res;
+    read(this->_getFD(), (void*)this->_getBuffer(), this->getB()*sizeof(res));
+    std::cout << "read (3): ";
+    
+    for(int i = 0; i < this->getB(); i++){
+        std::cout << this->_getBuffer()[i] << " ";
+    }
+    std::cout << std::endl;
 }
 
 void InputStream::_read4() {

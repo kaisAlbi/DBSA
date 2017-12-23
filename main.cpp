@@ -13,7 +13,7 @@
 using namespace std;
 
 int main(){
-    InputStream i_stream;
+    InputStream i_stream = InputStream(1);
     OutputStream o_stream;
     
     
@@ -26,7 +26,7 @@ int main(){
     o_stream.close();
     
     // testing input stream
-    i_stream.setUsedMethod(2);
+    i_stream.setUsedMethod(3);
     i_stream.open("new_file.dat");
     i_stream.read_next();
     //i_stream.read_next();
