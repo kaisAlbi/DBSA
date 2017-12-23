@@ -11,6 +11,7 @@
 class OutputStream {
     int _used_method;
     int _fd;
+    FILE* pFile;
     
     void _write1(int32_t);
     void _write2(int32_t);
@@ -19,8 +20,12 @@ class OutputStream {
     
     // private getters
     int _getFD();
+    FILE* _getPFile();
 
 public:
+    // constructor
+    OutputStream();
+    
     // getters
     int getUsedMethod();
     
@@ -33,9 +38,18 @@ public:
     void close();
 };
 
+// constructor
+OutputStream::OutputStream(){
+    this->_used_method = 1;
+}
+
 // private getters
 int OutputStream::_getFD() {
     return _fd;
+}
+
+FILE* OutputStream::_getPFile() {
+    return pFile;
 }
 
 // getters
@@ -58,8 +72,16 @@ void OutputStream::setUsedMethod(int new_method) {
 // required functions
 void OutputStream::create(std::string file_name) {
     std::cout << "creating file withe file name : " << file_name << std::endl;
-    this->_fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
-    std::cout << "obtained FD" << this->_fd << std::endl;
+    switch (this->getUsedMethod()) {
+        case 1:
+            this->_fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
+            std::cout << "obtained FD" << this->_fd << std::endl;
+            break;
+            
+        case 2:
+            this->pFile = fopen(file_name.c_str(), "wb");
+            break;
+    }
 }
 
 // classic write in binary file
@@ -68,6 +90,7 @@ void OutputStream::_write1(int32_t value) {
 }
 
 void OutputStream::_write2(int32_t value) {
+    fwrite(&value, sizeof(value), 1, this->_getPFile());
 }
 
 void OutputStream::_write3(int32_t value) {
@@ -99,6 +122,14 @@ void OutputStream::write(int32_t value) {
 
 void OutputStream::close() {
     std::cout << "closing stream" << std::endl;
-    ::close(this->_getFD());
+    switch (getUsedMethod()) {
+        case 1:
+            ::close(this->_getFD());
+            break;
+            
+        case 2:
+            fclose(this->_getPFile());
+            break;
+    }
 }
 

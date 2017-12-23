@@ -11,6 +11,7 @@ class InputStream {
     std::list<int32_t> stream;
     std::string _file;
     int _fd;
+    FILE* pFile;
     bool _EOS;
     bool _stop;
     
@@ -19,6 +20,7 @@ class InputStream {
     // private getters
     int _getFD();
     bool _getStopSignal();
+    FILE* _getPFile();
     
     // private setters
     void _flagStart();
@@ -68,6 +70,10 @@ bool InputStream::_getStopSignal() {
     return _stop;
 }
 
+FILE* InputStream::_getPFile() {
+    return pFile;
+}
+
 // getters
 std::string InputStream::getOpenFile() {
     return this->_file;
@@ -96,15 +102,30 @@ void InputStream::reachedEOS() {
 }
 
 void InputStream::setUsedMethod(int method_number) {
-    this->_used_method = (method_number % 4) + 1;
+    if(method_number < 1){
+        method_number = 1;
+    }
+    else if(method_number > 4){
+        method_number = 4;
+    }
+    this->_used_method = method_number;
 }
 
 // required functions
 void InputStream::open(std::string file_to_open) {
-    std::cout << "opening file : " << file_to_open << std::endl;
-    this->_file = file_to_open;
-    this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
-    std::cout << "obtained FD : " << _getFD() << std::endl;
+    switch (this->getUsedMethod()) {
+        case 1:
+            std::cout << "opening file : " << file_to_open << std::endl;
+            this->_file = file_to_open;
+            this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
+            std::cout << "obtained FD : " << _getFD() << std::endl;
+            break;
+            
+        case 2:
+            std::cout << "opening with method 2" << std::endl;
+            this->pFile = fopen(file_to_open.c_str(), "rb");
+            break;
+    }
 }
 
 void InputStream::_read1() {
@@ -113,13 +134,17 @@ void InputStream::_read1() {
      */
     int32_t res;
     read(this->_getFD(), &res, sizeof(res));
-    std::cout << "read : " << res << std::endl;
+    std::cout << "read (1): " << res << std::endl;
 }
 
 void InputStream::_read2() {
     /*
      read using stdio fread function
      */
+    int32_t res;
+    size_t status;
+    fread(&res, sizeof(res), 1, this->_getPFile());
+    std::cout << "read (2): " << res << std::endl;
 }
 
 void InputStream::_read3() {

@@ -18,14 +18,15 @@ int main(){
     
     
     // testing output stream
-    o_stream.create("new_file.dat");
     o_stream.setUsedMethod(2);
+    o_stream.create("new_file.dat");
     o_stream.write(1000);
     //o_stream.write(20000);
     //o_stream.write(40000);
     o_stream.close();
     
     // testing input stream
+    i_stream.setUsedMethod(2);
     i_stream.open("new_file.dat");
     i_stream.read_next();
     //i_stream.read_next();
