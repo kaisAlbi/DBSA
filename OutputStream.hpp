@@ -12,5 +12,6 @@
 #include <iostream>
 #include <fstream>
 #include <cstdint>
+#include <sys/mman.h>
 
 #endif /* OutputStream_hpp */

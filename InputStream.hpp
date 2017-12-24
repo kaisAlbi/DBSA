@@ -15,6 +15,8 @@
 #include <fstream>
 #include <unistd.h>
 #include <fcntl.h>
-//#include <fstream>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #endif /* InputStream_hpp */

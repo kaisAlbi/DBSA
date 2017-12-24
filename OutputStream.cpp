@@ -39,20 +39,12 @@ OutputStream::OutputStream(int B){
 // required functions
 void OutputStream::create(std::string file_name) {
     std::cout << "creating file withe file name : " << file_name << std::endl;
-    switch (this->getUsedMethod()) {
-        case 1:
-            this->fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
-            std::cout << "obtained FD" << this->fd << std::endl;
-            break;
-            
-        case 2:
-            this->pFile = fopen(file_name.c_str(), "wb");
-            break;
-        
-        case 3:
-            this->fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
-            std::cout << "obtained FD" << this->fd << std::endl;
-            break;
+    if(this->getUsedMethod() == 2){
+        this->pFile = fopen(file_name.c_str(), "wb");
+    }
+    else {
+        this->fd = ::open(file_name.c_str(), O_RDWR | O_CREAT |O_SYNC, (mode_t)0600);
+        std::cout << "obtained FD : " << this->fd << std::endl;
     }
 }
 
@@ -82,16 +74,40 @@ void OutputStream::write3(int32_t value) {
 }
 
 void OutputStream::write4(int32_t value) {
+    // memory mapping (minimum B : 1024);
+    
+    // case : init
+    if(this->getCurrentRead() == 0 && this->getTotalMappings() == 0){
+        int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_WRITE, MAP_SHARED, this->getFD(), 0);
+        this->setMappedData(map);
+    }
+    // case : further
+    if(this->getCurrentRead() == this->getB()){
+        std::cout << "creating new mapping" << std::endl;
+        munmap(this->getMappedData(), this->getB()*sizeof(size_t));
+        
+        // execute new mapping
+        off_t offset= (off_t) this->getTotalMappings() * this->getB() * sizeof(int32_t);
+        std::cout << "current offset : " << offset << std::endl;
+        int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_WRITE, MAP_SHARED, this->getFD(), offset);
+        
+        // update data
+        this->setMappedData(map);
+        this->current_read = 0;
+        this->increaseMappings();
+    }
+
+    std::cout << "write (4): " << value << std::endl;
+    this->getMappedData()[this->getCurrentRead()] = value;
+    this->increaseRead();
 }
 
 void OutputStream::write(int32_t value) {
     switch (this->getUsedMethod()) {
         case 1:
-            std::cout << "method 1 chosen .. " << std::endl;
             this->write1(value);
             break;
         case 2:
-            std::cout << "method 2 chosen .. " << std::endl;
             this->write2(value);
             break;
         case 3:

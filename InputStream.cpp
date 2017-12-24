@@ -53,26 +53,15 @@ void InputStream::reachedEOS() {
 
 // required functions (DUPLICATED CODE on 1 & 3 DUE TO ERRORS)
 void InputStream::open(std::string file_to_open) {
-    switch (this->getUsedMethod()) {
-        case 1:
-            std::cout << "opening file : " << file_to_open << std::endl;
-            this->file = file_to_open;
-            this->fd = ::open(file_to_open.c_str(), O_RDONLY);
-            std::cout << "obtained FD : " << getFD() << std::endl;
-            break;
-            
-        case 2:
-            std::cout << "opening with method 2" << std::endl;
-            this->pFile = fopen(file_to_open.c_str(), "rb");
-            break;
-        
-        case 3:
-            std::cout << "opening file : " << file_to_open << std::endl;
-            this->file = file_to_open;
-            this->fd = ::open(file_to_open.c_str(), O_RDONLY);
-            std::cout << "obtained FD : " << getFD() << std::endl;
-            break;
-            
+    if(this->getUsedMethod() == 2){
+        std::cout << "opening with method 2" << std::endl;
+        this->pFile = fopen(file_to_open.c_str(), "rb");
+    }
+    else {
+        std::cout << "opening file : " << file_to_open << std::endl;
+        this->file = file_to_open;
+        this->fd = ::open(file_to_open.c_str(), O_RDONLY);
+        std::cout << "obtained FD : " << getFD() << std::endl;
     }
 }
 
@@ -103,16 +92,29 @@ void InputStream::read3() {
         std::cout << "loading new buffer" << std::endl;
         int32_t res;
         read(this->getFD(), (void*)this->getBuffer(), this->getB()*sizeof(res));
-        
         this->current_read = 0;
     }
-    std::cout << "read (3): " << this->getBuffer()[this->getCurrentRead()];
+    std::cout << "read (3): " << this->getBuffer()[this->getCurrentRead()] << std::endl;
     this->increaseRead();
-    std::cout << std::endl;
 }
 
 void InputStream::read4() {
-    // memory mapping
+    // memory mapping (minimum B : 1024);
+    if(this->getCurrentRead() == this->getB()){
+        munmap(this->getMappedData(), this->getB()*sizeof(size_t));
+        std::cout << "creating new mapping" << std::endl;
+        // execute new mapping
+        off_t offset= (off_t) this->getTotalMappings() * this->getB() * sizeof(int32_t);
+        std::cout << "current offset : " << offset << std::endl;
+        int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_READ, MAP_SHARED, this->getFD(), offset);
+        
+        // update data
+        this->setMappedData(map);
+        this->current_read = 0;
+        this->increaseMappings();
+    }
+    std::cout << "read (4): " << this->getMappedData()[this->getCurrentRead()] << std::endl;
+    this->increaseRead();
 }
 
 void InputStream::read_next() {
