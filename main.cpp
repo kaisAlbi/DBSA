@@ -22,7 +22,7 @@ int main(){
     // testing output stream
     o_stream.setUsedMethod(3);
     o_stream.create("new_file.dat");
-    o_stream.write(4000);
+    o_stream.write(9000);
     o_stream.write(20000);
     //o_stream.write(40000);
     o_stream.close();
