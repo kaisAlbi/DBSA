@@ -11,5 +11,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <cstdint>
 
 #endif /* OutputStream_hpp */

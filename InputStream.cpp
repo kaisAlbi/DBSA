@@ -9,32 +9,35 @@
 #define MAX_ITEMS 100
 
 class InputStream {
-    std::list<int32_t> stream;
-    std::string _file;
-    int _fd;
+    int fd;
     FILE* pFile;
+    std::string file;
     int32_t buffer[MAX_ITEMS];
-    bool _EOS;
-    bool _stop;
     
-    int _used_method;
+    bool EOS;
+    bool stop;
+    
     int B;
+    int used_method;
+    int current_read;
     
     // private getters
-    int _getFD();
-    bool _getStopSignal();
-    FILE* _getPFile();
-    int32_t* _getBuffer();
+    int getFD();
+    bool getStopSignal();
+    FILE* getPFile();
+    int32_t* getBuffer();
+    int getCurrentRead();
     
     // private setters
-    void _flagStart();
-    void _flagStop();
+    void flagStart();
+    void flagStop();
+    void increaseRead();
     
     // private reads
-    void _read1();
-    void _read2();
-    void _read3();
-    void _read4();
+    void read1();
+    void read2();
+    void read3();
+    void read4();
     
 public:
     // constructors
@@ -62,40 +65,45 @@ public:
 // constructors
 InputStream::InputStream() {
     this->setOpenFile("none");
-    this->_EOS = false;
-    this->_stop = false;
-    this->_used_method = 1;
+    this->EOS = false;
+    this->stop = false;
+    this->used_method = 1;
 }
 
 InputStream::InputStream(int B) {
     InputStream();
     this->B = B;
+    this->current_read = B;
 }
 
 // private getters
-int InputStream::_getFD() {
-    return _fd;
+int InputStream::getFD() {
+    return fd;
 }
 
-bool InputStream::_getStopSignal() {
-    return _stop;
+bool InputStream::getStopSignal() {
+    return stop;
 }
 
-FILE* InputStream::_getPFile() {
+FILE* InputStream::getPFile() {
     return pFile;
 }
 
-int32_t* InputStream::_getBuffer() {
+int32_t* InputStream::getBuffer() {
     return buffer;
+}
+
+int InputStream::getCurrentRead() {
+    return current_read;
 }
 
 // getters
 std::string InputStream::getOpenFile() {
-    return this->_file;
+    return this->file;
 }
 
 int InputStream::getUsedMethod() {
-    return this->_used_method;
+    return this->used_method;
 }
 
 int InputStream::getB() {
@@ -103,21 +111,25 @@ int InputStream::getB() {
 }
 
 // private setters
-void InputStream::_flagStart() {
-    _stop = false;
+void InputStream::flagStart() {
+    stop = false;
 }
 
-void InputStream::_flagStop() {
-    _stop = true;
+void InputStream::flagStop() {
+    stop = true;
+}
+
+void InputStream::increaseRead() {
+    current_read++;
 }
 
 // setters
 void InputStream::setOpenFile(std::string open_file) {
-    this->_file = open_file;
+    this->file = open_file;
 }
 
 void InputStream::reachedEOS() {
-    this->_EOS = true;
+    this->EOS = true;
 }
 
 void InputStream::setUsedMethod(int method_number) {
@@ -127,7 +139,7 @@ void InputStream::setUsedMethod(int method_number) {
     else if(method_number > 4){
         method_number = 4;
     }
-    this->_used_method = method_number;
+    this->used_method = method_number;
 }
 
 // required functions
@@ -135,9 +147,9 @@ void InputStream::open(std::string file_to_open) {
     switch (this->getUsedMethod()) {
         case 1 | 3:
             std::cout << "opening file : " << file_to_open << std::endl;
-            this->_file = file_to_open;
-            this->_fd = ::open(file_to_open.c_str(), O_RDONLY);
-            std::cout << "obtained FD : " << _getFD() << std::endl;
+            this->file = file_to_open;
+            this->fd = ::open(file_to_open.c_str(), O_RDONLY);
+            std::cout << "obtained FD : " << getFD() << std::endl;
             break;
             
         case 2:
@@ -147,64 +159,68 @@ void InputStream::open(std::string file_to_open) {
     }
 }
 
-void InputStream::_read1() {
+void InputStream::read1() {
     /*
      read using unistd read function
      */
     int32_t res;
-    read(this->_getFD(), &res, sizeof(res));
+    read(this->getFD(), &res, sizeof(res));
     std::cout << "read (1): " << res << std::endl;
 }
 
-void InputStream::_read2() {
+void InputStream::read2() {
     /*
      read using stdio fread function
      */
     int32_t res;
     size_t status;
-    fread(&res, sizeof(res), 1, this->_getPFile());
+    fread(&res, sizeof(res), 1, this->getPFile());
     std::cout << "read (2): " << res << std::endl;
 }
 
-void InputStream::_read3() {
-    // read1 + buffer of size B (increase buffer 32 bits to upwards)
-    int32_t res;
-    read(this->_getFD(), (void*)this->_getBuffer(), this->getB()*sizeof(res));
-    std::cout << "read (3): ";
-    
-    for(int i = 0; i < this->getB(); i++){
-        std::cout << this->_getBuffer()[i] << " ";
+void InputStream::read3() {
+    /*
+     read1 + buffer of size B
+     */
+    if(this->getCurrentRead() == this->getB()){
+        std::cout << "loading new buffer" << std::endl;
+        int32_t res;
+        read(this->getFD(), (void*)this->getBuffer(), this->getB()*sizeof(res));
+        
+        this->current_read = 0;
     }
+    std::cout << "read (3): " << this->getBuffer()[this->getCurrentRead()];
+    this->increaseRead();
     std::cout << std::endl;
 }
 
-void InputStream::_read4() {
+void InputStream::read4() {
     // memory mapping
 }
 
 void InputStream::read_next() {
-    _flagStart();
+    flagStart();
     
     switch (this->getUsedMethod()) {
         case 1:
-            this->_read1();
+            this->read1();
             break;
         case 2:
-            this->_read2();
+            this->read2();
             break;
         case 3:
-            this->_read3();
+            this->read3();
             break;
         case 4:
-            this->_read4();
+            this->read4();
             break;
     }
 }
 
 bool InputStream::end_of_stream() {
-    return this->_EOS;
+    return this->EOS;
 }
 
 void InputStream::close() {
-    ::close(this->_getFD());
+    ::close(this->getFD());
 }

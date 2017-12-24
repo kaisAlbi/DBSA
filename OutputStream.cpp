@@ -6,31 +6,40 @@
 //
 
 #include "OutputStream.hpp"
-#include <cstdint>
+#define MAX_ITEMS 100
 
 class OutputStream {
-    int _used_method;
-    int _fd;
+    int fd;
     FILE* pFile;
+    int32_t buffer[MAX_ITEMS];
     
-    void _write1(int32_t);
-    void _write2(int32_t);
-    void _write3(int32_t);
-    void _write4(int32_t);
+    int B;
+    int used_method;
+    int current_read;
+    
+    void write1(int32_t);
+    void write2(int32_t);
+    void write3(int32_t);
+    void write4(int32_t);
     
     // private getters
-    int _getFD();
-    FILE* _getPFile();
+    int getFD();
+    FILE* getPFile();
+    int32_t* getBuffer();
+    int getCurrentRead();
 
 public:
     // constructor
     OutputStream();
+    OutputStream(int B);
     
     // getters
     int getUsedMethod();
+    int getB();
     
     // setters
     void setUsedMethod(int);
+    void increaseRead();
     
     // required functions
     void create(std::string);
@@ -40,42 +49,63 @@ public:
 
 // constructor
 OutputStream::OutputStream(){
-    this->_used_method = 1;
+    this->used_method = 1;
+}
+
+OutputStream::OutputStream(int B){
+    OutputStream();
+    this->B = B;
+    this->current_read = 0;
 }
 
 // private getters
-int OutputStream::_getFD() {
-    return _fd;
+int OutputStream::getFD() {
+    return fd;
 }
 
-FILE* OutputStream::_getPFile() {
+FILE* OutputStream::getPFile() {
     return pFile;
+}
+
+int32_t* OutputStream::getBuffer() {
+    return this->buffer;
+}
+
+int OutputStream::getCurrentRead() {
+    return this->current_read;
 }
 
 // getters
 int OutputStream::getUsedMethod() {
-    return _used_method;
+    return used_method;
+}
+
+int OutputStream::getB(){
+    return B;
 }
 
 // setters
 void OutputStream::setUsedMethod(int new_method) {
-    //this->_used_method = (new_method % 4) + 1;
     if(new_method < 1){
         new_method = 1;
     }
     else if(new_method > 4){
         new_method = 4;
     }
-    this->_used_method = new_method;
+    this->used_method = new_method;
+}
+
+void OutputStream::increaseRead(){
+    current_read++;
 }
 
 // required functions
 void OutputStream::create(std::string file_name) {
     std::cout << "creating file withe file name : " << file_name << std::endl;
     switch (this->getUsedMethod()) {
-        case 1:
-            this->_fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
-            std::cout << "obtained FD" << this->_fd << std::endl;
+        case 1|3:
+            this->fd = ::open(file_name.c_str(), O_WRONLY | O_CREAT);
+            std::cout << "obtained FD" << this->fd << std::endl;
             break;
             
         case 2:
@@ -84,38 +114,49 @@ void OutputStream::create(std::string file_name) {
     }
 }
 
-// classic write in binary file
-void OutputStream::_write1(int32_t value) {
-    ::write(this->_getFD(), &value, sizeof(value));
+void OutputStream::write1(int32_t value) {
+    std::cout << "write (1): " << value << std::endl;
+    ::write(this->getFD(), &value, sizeof(value));
 }
 
-void OutputStream::_write2(int32_t value) {
-    fwrite(&value, sizeof(value), 1, this->_getPFile());
+void OutputStream::write2(int32_t value) {
+    std::cout << "write (2): " << value << std::endl;
+    fwrite(&value, sizeof(value), 1, this->getPFile());
 }
 
-void OutputStream::_write3(int32_t value) {
+void OutputStream::write3(int32_t value) {
+    // execute buffered write
+    this->getBuffer()[this->getCurrentRead()] = value;
+    std::cout << "write (3): " << this->getBuffer()[this->getCurrentRead()] << std::endl;;
+    this->increaseRead();
+    
+    if(this->getCurrentRead() == this->getB()){
+        // write new buffer
+        std::cout << "writing buffer to file" << std::endl;
+        int32_t res;
+        ::write(this->getFD(), (void*)this->getBuffer(), this->getB()*sizeof(res));
+        this->current_read = 0;
+    }
 }
 
-void OutputStream::_write4(int32_t value) {
+void OutputStream::write4(int32_t value) {
 }
 
 void OutputStream::write(int32_t value) {
-    std::cout << "writing value " << value << " to the stream" << std::endl;
-    
     switch (this->getUsedMethod()) {
         case 1:
             std::cout << "method 1 chosen .. " << std::endl;
-            this->_write1(value);
+            this->write1(value);
             break;
         case 2:
             std::cout << "method 2 chosen .. " << std::endl;
-            this->_write2(value);
+            this->write2(value);
             break;
         case 3:
-            this->_write3(value);
+            this->write3(value);
             break;
         case 4:
-            this->_write4(value);
+            this->write4(value);
             break;
     }
 }
@@ -124,11 +165,11 @@ void OutputStream::close() {
     std::cout << "closing stream" << std::endl;
     switch (getUsedMethod()) {
         case 1:
-            ::close(this->_getFD());
+            ::close(this->getFD());
             break;
             
         case 2:
-            fclose(this->_getPFile());
+            fclose(this->getPFile());
             break;
     }
 }

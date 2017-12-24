@@ -13,15 +13,17 @@
 using namespace std;
 
 int main(){
-    InputStream i_stream = InputStream(1);
-    OutputStream o_stream;
+    //InputStream i_stream;
+    InputStream i_stream = InputStream(2);
+    //OutputStream o_stream;
+    OutputStream o_stream = OutputStream(2);
     
     
     // testing output stream
-    o_stream.setUsedMethod(2);
+    o_stream.setUsedMethod(3);
     o_stream.create("new_file.dat");
-    o_stream.write(1000);
-    //o_stream.write(20000);
+    o_stream.write(4000);
+    o_stream.write(20000);
     //o_stream.write(40000);
     o_stream.close();
     
@@ -29,7 +31,7 @@ int main(){
     i_stream.setUsedMethod(3);
     i_stream.open("new_file.dat");
     i_stream.read_next();
-    //i_stream.read_next();
+    i_stream.read_next();
     //bool end = i_stream.end_of_stream();
     //i_stream.close();
     
