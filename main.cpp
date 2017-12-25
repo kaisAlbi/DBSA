@@ -9,6 +9,7 @@
 #include "InputStream.cpp"
 #include "OutputStream.cpp"
 #include "diskFiles/fileGen.cpp"
+#include "MultiWayMerge.hpp"
 
 using namespace std;
 
@@ -41,8 +42,9 @@ int main(){
     o_stream.close();
     
     // testing input stream
-    i_stream.setUsedMethod(4);
+    i_stream.setUsedMethod(1);
     i_stream.open("new_file.dat");
+    i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
     
@@ -58,6 +60,8 @@ int main(){
     
     // file_gen test
     fileGen(10, "test.txt");
+    
+    multiway_merge(1, i_stream);
     
     return 1;
 }

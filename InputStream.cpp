@@ -11,9 +11,13 @@
 
 class InputStream: public Stream {    
     bool EOS;
+    int file_end;
     
     // private getters
     bool getStopSignal();
+    
+    // private setters
+    void increaseWrite();
     
     // private reads
     void read1();
@@ -46,6 +50,14 @@ InputStream::InputStream(int B) {
     this->current_read = B;
 }
 
+// private setters
+void InputStream::increaseWrite() {
+    Stream::increaseRead();
+    if(this->file_end == sizeof(int32_t)*this->current_read){
+        this->EOS = true;
+    }
+}
+
 // setters
 void InputStream::reachedEOS() {
     this->EOS = true;
@@ -56,13 +68,24 @@ void InputStream::open(std::string file_to_open) {
     if(this->getUsedMethod() == 2){
         std::cout << "opening with method 2" << std::endl;
         this->pFile = fopen(file_to_open.c_str(), "rb");
+        fseek(this->getPFile(), 0, SEEK_END);
+        this->file_end = ftell(this->getPFile());
+        fseek(this->getPFile(), 0, SEEK_SET);
     }
     else {
         std::cout << "opening file : " << file_to_open << std::endl;
         this->file = file_to_open;
         this->fd = ::open(file_to_open.c_str(), O_RDONLY);
         std::cout << "obtained FD : " << getFD() << std::endl;
+        
+        this->file_end = (int)lseek(this->getFD(), 0, SEEK_END);
+        lseek(this->getFD(), 0, SEEK_SET);
     }
+    
+    // clear info of previous streams
+    this->total_mappings = 0;
+    this->current_read = 0;
+    this->EOS = false;
 }
 
 void InputStream::read1() {
@@ -72,6 +95,7 @@ void InputStream::read1() {
     int32_t res;
     read(this->getFD(), &res, sizeof(res));
     std::cout << "read (1): " << res << std::endl;
+    this->increaseWrite();
 }
 
 void InputStream::read2() {
@@ -82,6 +106,7 @@ void InputStream::read2() {
     size_t status;
     fread(&res, sizeof(res), 1, this->getPFile());
     std::cout << "read (2): " << res << std::endl;
+    this->increaseWrite();
 }
 
 void InputStream::read3() {
@@ -95,7 +120,7 @@ void InputStream::read3() {
         this->current_read = 0;
     }
     std::cout << "read (3): " << this->getBuffer()[this->getCurrentRead()] << std::endl;
-    this->increaseRead();
+    this->increaseWrite();
 }
 
 void InputStream::read4() {
@@ -114,24 +139,29 @@ void InputStream::read4() {
         this->increaseMappings();
     }
     std::cout << "read (4): " << this->getMappedData()[this->getCurrentRead()] << std::endl;
-    this->increaseRead();
+    this->increaseWrite();
 }
 
 void InputStream::read_next() {
     
-    switch (this->getUsedMethod()) {
-        case 1:
-            this->read1();
-            break;
-        case 2:
-            this->read2();
-            break;
-        case 3:
-            this->read3();
-            break;
-        case 4:
-            this->read4();
-            break;
+    if(end_of_stream()){
+        std::cout << "read impossible, reached end of file" << std::endl;
+    }
+    else{
+        switch (this->getUsedMethod()) {
+            case 1:
+                this->read1();
+                break;
+            case 2:
+                this->read2();
+                break;
+            case 3:
+                this->read3();
+                break;
+            case 4:
+                this->read4();
+                break;
+        }
     }
 }
 
