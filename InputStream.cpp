@@ -20,10 +20,10 @@ class InputStream: public Stream {
     void increaseWrite();
     
     // private reads
-    void read1();
-    void read2();
-    void read3();
-    void read4();
+    int32_t read1();
+    int32_t read2();
+    int32_t read3();
+    int32_t read4();
     
 public:
     // constructors
@@ -35,7 +35,7 @@ public:
     
     // required functions
     void open(std::string);
-    void read_next();
+    int32_t read_next();
     bool end_of_stream();
 };
 
@@ -54,7 +54,7 @@ InputStream::InputStream(int B) {
 void InputStream::increaseWrite() {
     Stream::increaseRead();
     if(this->file_end == sizeof(int32_t)*this->current_read){
-        this->EOS = true;
+        this->reachedEOS();
     }
 }
 
@@ -88,7 +88,7 @@ void InputStream::open(std::string file_to_open) {
     this->EOS = false;
 }
 
-void InputStream::read1() {
+int32_t InputStream::read1() {
     /*
      read using unistd read function
      */
@@ -96,9 +96,11 @@ void InputStream::read1() {
     read(this->getFD(), &res, sizeof(res));
     std::cout << "read (1): " << res << std::endl;
     this->increaseWrite();
+    
+    return res;
 }
 
-void InputStream::read2() {
+int32_t InputStream::read2() {
     /*
      read using stdio fread function
      */
@@ -107,23 +109,29 @@ void InputStream::read2() {
     fread(&res, sizeof(res), 1, this->getPFile());
     std::cout << "read (2): " << res << std::endl;
     this->increaseWrite();
+    
+    return res;
 }
 
-void InputStream::read3() {
+int32_t InputStream::read3() {
     /*
      read1 + buffer of size B
      */
+    int32_t res;
     if(this->getCurrentRead() == this->getB()){
         std::cout << "loading new buffer" << std::endl;
         int32_t res;
         read(this->getFD(), (void*)this->getBuffer(), this->getB()*sizeof(res));
         this->current_read = 0;
     }
-    std::cout << "read (3): " << this->getBuffer()[this->getCurrentRead()] << std::endl;
+    res = this->getBuffer()[this->getCurrentRead()];
+    std::cout << "read (3): " << res << std::endl;
     this->increaseWrite();
+    
+    return res;
 }
 
-void InputStream::read4() {
+int32_t InputStream::read4() {
     // memory mapping (minimum B : 1024);
     if(this->getCurrentRead() == this->getB()){
         munmap(this->getMappedData(), this->getB()*sizeof(size_t));
@@ -138,31 +146,37 @@ void InputStream::read4() {
         this->current_read = 0;
         this->increaseMappings();
     }
-    std::cout << "read (4): " << this->getMappedData()[this->getCurrentRead()] << std::endl;
+    int32_t res = this->getMappedData()[this->getCurrentRead()];
+    std::cout << "read (4): " << res << std::endl;
     this->increaseWrite();
+    
+    return res;
 }
 
-void InputStream::read_next() {
+int32_t InputStream::read_next() {
     
+    int32_t res;
     if(end_of_stream()){
         std::cout << "read impossible, reached end of file" << std::endl;
+        res = 0;
     }
     else{
         switch (this->getUsedMethod()) {
             case 1:
-                this->read1();
+                res = this->read1();
                 break;
             case 2:
-                this->read2();
+                res = this->read2();
                 break;
             case 3:
-                this->read3();
+                res = this->read3();
                 break;
             case 4:
-                this->read4();
+                res = this->read4();
                 break;
         }
     }
+    return res;
 }
 
 bool InputStream::end_of_stream() {
