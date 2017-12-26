@@ -41,11 +41,14 @@ std::queue<int32_t> reorder(std::queue<int32_t> sorting_queue, int32_t min, int 
     return sorting_queue;
 }
 
-void multiway_merge(std::list<InputStream> input_streams){
+InputStream multiway_merge(std::list<InputStream> input_streams, int count = 0){
     
     OutputStream sorted_stream;
-    sorted_stream.create("test_files/mergesort.dat");
+    InputStream return_stream;
+    sorted_stream.create("test_files/mergesort" + std::to_string(count) + ".dat");
     std::queue<int32_t> sorting_queue;
+    
+    int j = 1;
     
     // get elements into queue
     for(int i = 0; i < input_streams.size(); i++){
@@ -79,6 +82,9 @@ void multiway_merge(std::list<InputStream> input_streams){
     }
     
     sorted_stream.close();
+    
+    return_stream.open("test_files/mergesort" + std::to_string(count) + ".dat");
+    return return_stream;
 }
 
 void s_merge(int32_t to_sort[], int start_1, int end_1, int start_2, int end_2){
@@ -192,6 +198,7 @@ void external_merge(std::string input_file, int M, int d){
         for(int j = 0; j < nb_elem; j++) {
             out_stream.write(stream_content[j]);
         }
+        out_stream.close();
     }
     
     // stored sorted streams in queue
@@ -200,6 +207,43 @@ void external_merge(std::string input_file, int M, int d){
         new_stream.open("external_merge/merge" + std::to_string(i+1) + ".dat");
         file_merging.push(std::make_shared<InputStream>(new_stream));
     }
+    
+    std::list<InputStream> to_merge;
+    InputStream temp;
+    int count = 1;
+    
+    // while files to merge
+    while(!file_merging.empty()){
+        // no previous result -> pre-select
+        if(count == 1){
+            temp = *file_merging.front();
+            to_merge.push_back(temp);
+            file_merging.pop();
+        }
+        
+        // merge max d files together | previous result -> i = 1
+        for(int i = 1; i < d && !file_merging.empty(); i++){
+            temp = *file_merging.front();
+            to_merge.push_back(temp);
+            file_merging.pop();
+        }
+        
+        // obtain result
+        temp = multiway_merge(to_merge, count);
+        to_merge.clear();
+        to_merge.push_back(temp);
+        count++;
+    }
+    
+    // clear working files and rename resulting file
+    std::string file_identifier, final_file;
+    for(int i = 1; i < count-1; i++){
+        file_identifier = "test_files/mergesort" + std::to_string(i) + ".dat";
+        remove(file_identifier.c_str());
+    }
+    file_identifier = "test_files/mergesort" + std::to_string(count-1) + ".dat";
+    final_file = "test_files/merge_result.dat";
+    rename(file_identifier.c_str(), final_file.c_str());
 }
 
 #endif /* Merge_hpp */

@@ -91,13 +91,18 @@ int main(){
     i_stream.close();
     i_stream2.close();
     
-    i_stream.open("test_files/mergesort.dat");
+    i_stream.open("test_files/mergesort0.dat");
     i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
      */
-    external_merge("test_files/test.dat", 800, 10);
+    external_merge("test_files/test.dat", 800, 3);
+    
+    i_stream.open("test_files/merge_result.dat");
+    for(int i = 0; i < 1025; i++){
+        i_stream.read_next();
+    }
     
     return 1;
 }
