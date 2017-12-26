@@ -11,13 +11,13 @@
 #include <stdio.h>
 #include <queue>
 
-int32_t find_min(std::queue<int32_t> sorting_queue, int k, int n){
+int32_t find_min(std::queue<int32_t> sorting_queue, int range, int size){
     int32_t min = sorting_queue.front();
     int32_t current;
-    for(int i = 1; i < n; i++){
+    for(int i = 1; i < size; i++){
         current = sorting_queue.front();
         sorting_queue.pop();
-        if(current < min && i <= k){
+        if(current < min && i <= range){
             min = current;
         }
         sorting_queue.push(current);
@@ -39,9 +39,9 @@ std::queue<int32_t> reorder(std::queue<int32_t> sorting_queue, int32_t min, int 
 }
 
 void multiway_merge(std::list<InputStream> input_streams){
-    OutputStream sorted_stream;
-    sorted_stream.create("mergesort.dat");
     
+    OutputStream sorted_stream;
+    sorted_stream.create("test_files/mergesort.dat");
     std::queue<int32_t> sorting_queue;
     
     // get elements into queue

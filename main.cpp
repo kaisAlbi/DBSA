@@ -8,10 +8,34 @@
 #include "main.hpp"
 #include "InputStream.cpp"
 #include "OutputStream.cpp"
-#include "diskFiles/fileGen.cpp"
-#include "MultiWayMerge.hpp"
+#include "Merge.hpp"
+#include <random>
 
 using namespace std;
+
+void file_generator(std::string file_name, int length){
+    OutputStream generator_stream = OutputStream(length);
+    generator_stream.create(file_name);
+    
+    // random device & seed
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    
+    // define boundaries and distribution
+    int32_t int32min = std::numeric_limits<int32_t>::min();
+    int32_t int32max = std::numeric_limits<int32_t>::max();
+    std::uniform_int_distribution<int32_t> distribution(int32min,int32max);
+    
+    // write to stream
+    int32_t chosen;
+    for(int i = 0; i < length; i++){
+        chosen = distribution(gen);
+        generator_stream.write(chosen);
+    }
+    
+    // close
+    generator_stream.close();
+}
 
 int main(){
     /*
@@ -27,20 +51,20 @@ int main(){
     
     // testing output stream
     o_stream.setUsedMethod(1);
-    o_stream.create("new_file.dat");
+    o_stream.create("test_files/new_file.dat");
     o_stream.write(10000);
     o_stream.write(60000);
     o_stream.close();
     
     o_stream2.setUsedMethod(1);
-    o_stream2.create("new_file2.dat");
+    o_stream2.create("test_files/new_file2.dat");
     o_stream2.write(8000);
     o_stream2.write(70000);
     o_stream2.close();
     
     // testing input stream
     i_stream.setUsedMethod(1);
-    i_stream.open("new_file.dat");
+    i_stream.open("test_files/new_file.dat");
     i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
@@ -49,11 +73,15 @@ int main(){
     i_stream.close();
     
     // file_gen test
-    fileGen(10, "test.txt");
+    file_generator("test_files/test.dat", 1024);
+    i_stream.open("test_files/test.dat");
+    for(int i = 0; i < 30; i++){
+        i_stream.read_next();
+    }
     
     // merge tests
-    i_stream.open("new_file.dat");
-    i_stream2.open("new_file2.dat");
+    i_stream.open("test_files/new_file.dat");
+    i_stream2.open("test_files/new_file2.dat");
     
     std::list<InputStream> list_of_streams;
     list_of_streams.push_back(i_stream);
@@ -63,7 +91,7 @@ int main(){
     i_stream.close();
     i_stream2.close();
     
-    i_stream.open("mergesort.dat");
+    i_stream.open("test_files/mergesort.dat");
     i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
