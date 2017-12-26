@@ -5,11 +5,14 @@
 //  Created by Tanguy d'Hose on 25/12/17.
 //
 
-#ifndef MultiWayMerge_hpp
-#define MultiWayMerge_hpp
+#ifndef Merge_hpp
+#define Merge_hpp
 
 #include <stdio.h>
 #include <queue>
+#include <fstream>
+#include <cmath>
+#include <memory>
 
 int32_t find_min(std::queue<int32_t> sorting_queue, int range, int size){
     int32_t min = sorting_queue.front();
@@ -78,5 +81,46 @@ void multiway_merge(std::list<InputStream> input_streams){
     sorted_stream.close();
 }
 
-#endif /* MultiWayMerge_hpp */
+// M = available memory in number of int32_t, d = number of streams for merge
+void external_merge(std::string input_file, int M, int d){
+    
+    // data structures
+    std::queue<std::shared_ptr<OutputStream> > file_partitionning;
+    InputStream dispatch_stream;
+    dispatch_stream.open(input_file);
+    
+    // obtain file size
+    std::ifstream file(input_file, std::ifstream::ate | std::ifstream::binary);
+    int size = file.tellg();
+    std::cout << "file size : " << size << std::endl;
+    
+    // calculate streams
+    int streams = (int)std::ceil(size / (double)M);
+    std::cout << "require streams : " << streams << std::endl;
+    
+    // split file into streams
+    for(int i = 0; i < streams; i++){
+        OutputStream new_stream;
+        new_stream.create("external_merge/merge" + std::to_string(i+1) + ".dat");
+        file_partitionning.push(std::make_shared<OutputStream>(new_stream));
+    }
+    
+    // dispatch contents into files
+    int32_t value = dispatch_stream.read_next();
+    while(value != 0){
+        file_partitionning.front()->write(value);
+        auto temp = file_partitionning.front();
+        file_partitionning.pop();
+        file_partitionning.push(temp);
+        value = dispatch_stream.read_next();
+    }
+    
+    
+    
+    InputStream file_reader;
+    file_reader.open(input_file);
+    file_reader.read_next();
+}
+
+#endif /* Merge_hpp */
 

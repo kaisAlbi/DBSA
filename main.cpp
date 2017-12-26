@@ -48,7 +48,7 @@ int main(){
     OutputStream o_stream = OutputStream(1024);
     OutputStream o_stream2 = OutputStream(1024);
     
-    
+    /*
     // testing output stream
     o_stream.setUsedMethod(1);
     o_stream.create("test_files/new_file.dat");
@@ -96,6 +96,8 @@ int main(){
     i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
+     */
+    external_merge("test_files/test.dat", 800, 10);
     
     return 1;
 }
