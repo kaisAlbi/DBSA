@@ -15,6 +15,9 @@
 #include <memory>
 
 int32_t find_min(std::queue<int32_t> sorting_queue, int range, int size){
+    /*
+     function finding minimum in queue within specified range
+     */
     int32_t min = sorting_queue.front();
     int32_t current;
     for(int i = 1; i < size; i++){
@@ -29,6 +32,9 @@ int32_t find_min(std::queue<int32_t> sorting_queue, int range, int size){
 }
 
 std::queue<int32_t> reorder(std::queue<int32_t> sorting_queue, int32_t min, int n){
+    /*
+     function designed to reorder queue increasingly
+     */
     int32_t current;
     for(int i = 1; i <= n; i++){
         current = sorting_queue.front();
@@ -42,13 +48,15 @@ std::queue<int32_t> reorder(std::queue<int32_t> sorting_queue, int32_t min, int 
 }
 
 InputStream multiway_merge(std::list<InputStream> input_streams, int count = 0){
+    /*
+     function designed to merge multiple input streams together,
+     for practical purposes returns resulting input stream
+     */
     
     OutputStream sorted_stream;
     InputStream return_stream;
     sorted_stream.create("test_files/mergesort" + std::to_string(count) + ".dat");
     std::queue<int32_t> sorting_queue;
-    
-    int j = 1;
     
     // get elements into queue
     for(int i = 0; i < input_streams.size(); i++){
@@ -88,6 +96,9 @@ InputStream multiway_merge(std::list<InputStream> input_streams, int count = 0){
 }
 
 void s_merge(int32_t to_sort[], int start_1, int end_1, int start_2, int end_2){
+    /*
+     function part of merge-sort : merges sub-arrays together
+     */
     int len = end_2 - start_1 + 1;
     int32_t temp[len];
     int left = start_1;
@@ -114,6 +125,9 @@ void s_merge(int32_t to_sort[], int start_1, int end_1, int start_2, int end_2){
 }
 
 void sub_sort(int32_t to_sort[], int start, int end){
+    /*
+     function part of merge-sort : sorts (sub-)arrays
+     */
     if(start >= end){
         return;
     }
@@ -126,18 +140,29 @@ void sub_sort(int32_t to_sort[], int start, int end){
 }
 
 void merge_sort(int32_t to_sort[], int len){
+    /*
+     merge-sort main function : calls subsort on entire array
+     */
     sub_sort(to_sort, 0, len-1);
 }
 
 
 int getFileSize(std::string input_file){
+    /*
+     function designed to return file size in bytes
+     */
     std::ifstream file(input_file, std::ifstream::ate | std::ifstream::binary);
     int size = file.tellg();
     return size;
 }
 
-// M = available memory in number of int32_t, d = number of streams for merge
 void external_merge(std::string input_file, int M, int d){
+    /*
+     function designed to execute external merge based on:
+        'input_file' = .dat file name
+        'M' = available memory in number of 32-bit integers
+        'd' = maximum number of streams that are up for merge
+     */
     
     // data structures
     std::queue<std::shared_ptr<OutputStream> > file_partitionning;

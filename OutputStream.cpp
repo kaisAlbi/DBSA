@@ -32,7 +32,7 @@ OutputStream::OutputStream(){
 
 OutputStream::OutputStream(int B){
     OutputStream();
-    this->B = B;
+    this->B = B;                    // forces immediate buffer reload
     this->current_read = 0;
 }
 

@@ -14,6 +14,9 @@
 using namespace std;
 
 void file_generator(std::string file_name, int length){
+    /*
+     Generates binary file of 'length' 32-bit int's withe name 'file_name'
+     */
     OutputStream generator_stream = OutputStream(length);
     generator_stream.create(file_name);
     
@@ -39,7 +42,7 @@ void file_generator(std::string file_name, int length){
 
 int main(){
     /*
-     B must be equal in i_stream and o_stream
+     B must be equal in i_stream and o_stream; minium 1024 for method 4
      */
     //InputStream i_stream;
     InputStream i_stream = InputStream(1024);
@@ -49,7 +52,7 @@ int main(){
     OutputStream o_stream2 = OutputStream(1024);
     
     /*
-    // testing output stream
+    // testing output stream (-> used method / writes)
     o_stream.setUsedMethod(1);
     o_stream.create("test_files/new_file.dat");
     o_stream.write(10000);
@@ -61,8 +64,10 @@ int main(){
     o_stream2.write(8000);
     o_stream2.write(70000);
     o_stream2.close();
+     */
     
-    // testing input stream
+    /*
+    // testing input stream (-> used method / reads)
     i_stream.setUsedMethod(1);
     i_stream.open("test_files/new_file.dat");
     i_stream.read_next();
@@ -71,15 +76,19 @@ int main(){
     
     //bool end = i_stream.end_of_stream();
     i_stream.close();
-    
+    */
+     
     // file_gen test
+     /*
     file_generator("test_files/test.dat", 1024);
     i_stream.open("test_files/test.dat");
-    for(int i = 0; i < 30; i++){
+    for(int i = 0; i < 1024; i++){
         i_stream.read_next();
     }
+     */
     
     // merge tests
+     /*
     i_stream.open("test_files/new_file.dat");
     i_stream2.open("test_files/new_file2.dat");
     
@@ -87,6 +96,8 @@ int main(){
     list_of_streams.push_back(i_stream);
     list_of_streams.push_back(i_stream2);
     
+      
+    // multiway merge test
     multiway_merge(list_of_streams);
     i_stream.close();
     i_stream2.close();
@@ -96,7 +107,9 @@ int main(){
     i_stream.read_next();
     i_stream.read_next();
     i_stream.read_next();
-     */
+    */
+    
+    // external merge test
     external_merge("test_files/test.dat", 800, 3);
     
     i_stream.open("test_files/merge_result.dat");

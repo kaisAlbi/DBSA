@@ -17,7 +17,7 @@ class InputStream: public Stream {
     bool getStopSignal();
     
     // private setters
-    void increaseWrite();
+    void increaseRead();
     
     // private reads
     int32_t read1();
@@ -51,7 +51,7 @@ InputStream::InputStream(int B) {
 }
 
 // private setters
-void InputStream::increaseWrite() {
+void InputStream::increaseRead() {
     Stream::increaseRead();
     if(this->file_end == sizeof(int32_t)*this->current_read){
         this->reachedEOS();
@@ -95,7 +95,7 @@ int32_t InputStream::read1() {
     int32_t res;
     read(this->getFD(), &res, sizeof(res));
     std::cout << "read (1): " << res << std::endl;
-    this->increaseWrite();
+    this->increaseRead();
     
     return res;
 }
@@ -108,7 +108,7 @@ int32_t InputStream::read2() {
     size_t status;
     fread(&res, sizeof(res), 1, this->getPFile());
     std::cout << "read (2): " << res << std::endl;
-    this->increaseWrite();
+    this->increaseRead();
     
     return res;
 }
@@ -126,7 +126,7 @@ int32_t InputStream::read3() {
     }
     res = this->getBuffer()[this->getCurrentRead()];
     std::cout << "read (3): " << res << std::endl;
-    this->increaseWrite();
+    this->increaseRead();
     
     return res;
 }
@@ -148,7 +148,7 @@ int32_t InputStream::read4() {
     }
     int32_t res = this->getMappedData()[this->getCurrentRead()];
     std::cout << "read (4): " << res << std::endl;
-    this->increaseWrite();
+    this->increaseRead();
     
     return res;
 }
