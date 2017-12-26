@@ -81,17 +81,66 @@ void multiway_merge(std::list<InputStream> input_streams){
     sorted_stream.close();
 }
 
+void s_merge(int32_t to_sort[], int start_1, int end_1, int start_2, int end_2){
+    int len = end_2 - start_1 + 1;
+    int32_t temp[len];
+    int left = start_1;
+    int right = start_2;
+    
+    for(int i = 0; i < len; i++){
+        if(left > end_1){
+            temp[i] = to_sort[right++];
+        }
+        else if(right > end_2){
+            temp[i] = to_sort[left++];
+        }
+        else if(to_sort[left] <= to_sort[right]){
+            temp[i] = to_sort[left++];
+        }
+        else {
+            temp[i] = to_sort[right++];
+        }
+    }
+    
+    for(int i = 0; i < len; i++){
+        to_sort[start_1++] = temp[i];
+    }
+}
+
+void sub_sort(int32_t to_sort[], int start, int end){
+    if(start >= end){
+        return;
+    }
+    else {
+        int mid = (start+end) / 2;
+        sub_sort(to_sort, start, mid);
+        sub_sort(to_sort, mid+1, end);
+        s_merge(to_sort, start, mid, mid+1, end);
+    }
+}
+
+void merge_sort(int32_t to_sort[], int len){
+    sub_sort(to_sort, 0, len-1);
+}
+
+
+int getFileSize(std::string input_file){
+    std::ifstream file(input_file, std::ifstream::ate | std::ifstream::binary);
+    int size = file.tellg();
+    return size;
+}
+
 // M = available memory in number of int32_t, d = number of streams for merge
 void external_merge(std::string input_file, int M, int d){
     
     // data structures
     std::queue<std::shared_ptr<OutputStream> > file_partitionning;
+    std::queue<std::shared_ptr<InputStream> > file_merging;
     InputStream dispatch_stream;
     dispatch_stream.open(input_file);
     
     // obtain file size
-    std::ifstream file(input_file, std::ifstream::ate | std::ifstream::binary);
-    int size = file.tellg();
+    int size = getFileSize(input_file);
     std::cout << "file size : " << size << std::endl;
     
     // calculate streams
@@ -115,11 +164,42 @@ void external_merge(std::string input_file, int M, int d){
         value = dispatch_stream.read_next();
     }
     
+    // close streams
+    for(int i = 0; i < streams; i++){
+        file_partitionning.front()->close();
+        file_partitionning.pop();
+    }
     
+    // open created streams and mergesort
+    for(int i = 0; i < streams; i++){
+        InputStream in_stream;
+        in_stream.open("external_merge/merge" + std::to_string(i+1) + ".dat");
+        size = getFileSize("external_merge/merge" + std::to_string(i+1) + ".dat");
+        
+        int nb_elem = size/sizeof(int32_t);
+        int32_t stream_content[nb_elem];
+        
+        for(int j = 0; j < nb_elem; j++){
+            value = in_stream.read_next();
+            stream_content[j] = value;
+        }
+        in_stream.close();
+        
+        merge_sort(stream_content, nb_elem);
+        
+        OutputStream out_stream;
+        out_stream.create("external_merge/merge" + std::to_string(i+1) + ".dat");
+        for(int j = 0; j < nb_elem; j++) {
+            out_stream.write(stream_content[j]);
+        }
+    }
     
-    InputStream file_reader;
-    file_reader.open(input_file);
-    file_reader.read_next();
+    // stored sorted streams in queue
+    for(int i = 0; i < streams; i++){
+        InputStream new_stream;
+        new_stream.open("external_merge/merge" + std::to_string(i+1) + ".dat");
+        file_merging.push(std::make_shared<InputStream>(new_stream));
+    }
 }
 
 #endif /* Merge_hpp */
