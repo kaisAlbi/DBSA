@@ -7,7 +7,7 @@
 
 #include "OutputStream.hpp"
 #include "Stream.hpp"
-#define MAX_ITEMS 100
+#define MAX_ITEMS 1024
 
 class OutputStream: public Stream {
     
@@ -33,7 +33,7 @@ OutputStream::OutputStream(){
 OutputStream::OutputStream(int B){
     OutputStream();
     this->B = B;                    // forces immediate buffer reload
-    this->current_read = 0;
+    this->current_read = B;
 }
 
 // required functions
@@ -64,11 +64,12 @@ void OutputStream::write3(int32_t value) {
     std::cout << "write (3): " << this->getBuffer()[this->getCurrentRead()] << std::endl;;
     this->increaseRead();
     
-    if(this->getCurrentRead() == this->getB()){
+    int to_write = std::min(this->getB(), MAX_ITEMS);
+    if(this->getCurrentRead() == to_write){
         // write new buffer
         std::cout << "writing buffer to file" << std::endl;
         int32_t res;
-        ::write(this->getFD(), (void*)this->getBuffer(), this->getB()*sizeof(res));
+        ::write(this->getFD(), (void*)this->getBuffer(), to_write*sizeof(res));
         this->current_read = 0;
     }
 }
@@ -77,12 +78,14 @@ void OutputStream::write4(int32_t value) {
     // memory mapping (minimum B : 1024);
     
     // case : init
-    if(this->getCurrentRead() == 0 && this->getTotalMappings() == 0){
+    if(this->getCurrentRead() == this->getB() && this->getTotalMappings() == 0){
+        std::cout << "first mapping" << std::endl;
         int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_WRITE, MAP_SHARED, this->getFD(), 0);
         this->setMappedData(map);
+        this->current_read = 0;
     }
     // case : further
-    if(this->getCurrentRead() == this->getB()){
+    else if(this->getCurrentRead() == this->getB()){
         std::cout << "creating new mapping" << std::endl;
         munmap(this->getMappedData(), this->getB()*sizeof(size_t));
         
@@ -98,7 +101,8 @@ void OutputStream::write4(int32_t value) {
     }
 
     std::cout << "write (4): " << value << std::endl;
-    this->getMappedData()[this->getCurrentRead()] = value;
+    std::cout << "fetch at : " << this->getCurrentRead() << std::endl;
+    this->getMappedData()[this->getCurrentRead()] = value;                  //--> causes problems when benchmarking
     this->increaseRead();
 }
 

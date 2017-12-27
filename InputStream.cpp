@@ -8,6 +8,7 @@
 #include "InputStream.hpp"
 #include "Stream.cpp"
 #define MAX_ITEMS 100
+#define PAGE_SIZE_ITEMS 1024
 
 class InputStream: public Stream {    
     bool EOS;
@@ -47,7 +48,7 @@ InputStream::InputStream() {
 InputStream::InputStream(int B) {
     InputStream();
     this->B = B;
-    this->current_read = B;
+    this->current_read = 0;
 }
 
 // private setters
@@ -118,27 +119,28 @@ int32_t InputStream::read3() {
      read1 + buffer of size B
      */
     int32_t res;
-    if(this->getCurrentRead() == this->getB()){
+    int to_load = std::min(this->getB(), MAX_ITEMS);
+    
+    if(this->getCurrentRead() == to_load or !this->getTotalMappings()){
         std::cout << "loading new buffer" << std::endl;
-        int32_t res;
-        read(this->getFD(), (void*)this->getBuffer(), this->getB()*sizeof(res));
+        read(this->getFD(), (void*)this->getBuffer(), to_load*sizeof(res));
         this->current_read = 0;
+        this->increaseMappings();
     }
     res = this->getBuffer()[this->getCurrentRead()];
     std::cout << "read (3): " << res << std::endl;
     this->increaseRead();
-    
     return res;
 }
 
 int32_t InputStream::read4() {
     // memory mapping (minimum B : 1024);
-    if(this->getCurrentRead() == this->getB()){
+    if(this->getCurrentRead() == this->getB() or !this->getTotalMappings()){
         munmap(this->getMappedData(), this->getB()*sizeof(size_t));
         std::cout << "creating new mapping" << std::endl;
+        
         // execute new mapping
         off_t offset= (off_t) this->getTotalMappings() * this->getB() * sizeof(int32_t);
-        std::cout << "current offset : " << offset << std::endl;
         int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_READ, MAP_SHARED, this->getFD(), offset);
         
         // update data
