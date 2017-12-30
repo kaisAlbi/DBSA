@@ -6,7 +6,7 @@
 //
 
 #include "Stream.hpp"
-#define MAX_ITEMS 100
+#define MAX_ITEMS 1024
 
 class Stream {
 protected:

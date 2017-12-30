@@ -14,7 +14,9 @@
 #include <random>
 #include <queue>
 #include <ctime>
+
 #define ELEM_PER_PAGE 1024
+#define MAX_STREAMS 30
 
 using namespace std;
 
@@ -60,7 +62,6 @@ int32_t value_generator_32bit(){
 
 int max_streams(){
     int i = 0;
-    int max = 30;
     std::ofstream *f;
     std::queue<std::ofstream*> stream_queue;
     
@@ -68,7 +69,7 @@ int max_streams(){
     do {
         f = new std::ofstream(std::to_string(i++));
         stream_queue.push(f);
-    } while (*f << std::flush && i <= max);
+    } while (*f << std::flush && i <= MAX_STREAMS);
     --i;
     
     // close all files
@@ -83,7 +84,6 @@ int max_streams(){
         remove(std::to_string(j).c_str());
     }
     
-    std::cout << "max streams : " << i << std::endl;
     return i;
 }
 
@@ -138,7 +138,7 @@ void IO_benchmark(int wanted_str, int file_size, int stream_operations, int read
     
     // close benchmarking files
     for(int j = 0; j < half; j++){
-         reading_streams.front()->close();
+        reading_streams.front()->close();
         auto temp = reading_streams.front();
         reading_streams.pop();
         reading_streams.push(temp);
@@ -150,7 +150,6 @@ void IO_benchmark(int wanted_str, int file_size, int stream_operations, int read
         writing_streams.pop();
         writing_streams.push(temp);
     }
-    
     
     // remove created benchmarking files
     for(int i = 0; i < streams; i++){
@@ -173,7 +172,7 @@ int main(){
     OutputStream o_stream = OutputStream(1024);
     OutputStream o_stream2 = OutputStream(1024);
     
-    IO_benchmark(10, 1024, 1, 4, 4);
+    IO_benchmark(10, 1024, 1000, 4, 4);
     
     // testing output stream (-> used method / writes)
     /*

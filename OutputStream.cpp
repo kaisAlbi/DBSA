@@ -11,6 +11,9 @@
 
 class OutputStream: public Stream {
     
+    // private getter
+    int getMappingLength();
+    
     void write1(int32_t);
     void write2(int32_t);
     void write3(int32_t);
@@ -48,6 +51,11 @@ void OutputStream::create(std::string file_name) {
     }
 }
 
+// private getters
+int OutputStream::getMappingLength(){
+    return this->getB()*sizeof(int32_t);
+}
+
 void OutputStream::write1(int32_t value) {
     std::cout << "write (1): " << value << std::endl;
     ::write(this->getFD(), &value, sizeof(value));
@@ -80,19 +88,21 @@ void OutputStream::write4(int32_t value) {
     // case : init
     if(this->getCurrentRead() == this->getB() && this->getTotalMappings() == 0){
         std::cout << "first mapping" << std::endl;
-        int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_WRITE, MAP_SHARED, this->getFD(), 0);
+        ftruncate(this->getFD(), this->getMappingLength());
+        int32_t* map = (int32_t*)mmap(0, this->getMappingLength(), PROT_WRITE, MAP_SHARED, this->getFD(), 0);
         this->setMappedData(map);
         this->current_read = 0;
     }
     // case : further
     else if(this->getCurrentRead() == this->getB()){
         std::cout << "creating new mapping" << std::endl;
-        munmap(this->getMappedData(), this->getB()*sizeof(size_t));
+        munmap(this->getMappedData(), this->getMappingLength());
         
         // execute new mapping
-        off_t offset= (off_t) this->getTotalMappings() * this->getB() * sizeof(int32_t);
+        off_t offset= (off_t) this->getTotalMappings() * this->getMappingLength();
         std::cout << "current offset : " << offset << std::endl;
-        int32_t* map = (int32_t*)mmap(0, this->getB()*sizeof(size_t), PROT_WRITE, MAP_SHARED, this->getFD(), offset);
+        ftruncate(this->getFD(), offset + this->getMappingLength());
+        int32_t* map = (int32_t*)mmap(0, this->getMappingLength(), PROT_WRITE, MAP_SHARED, this->getFD(), offset);
         
         // update data
         this->setMappedData(map);

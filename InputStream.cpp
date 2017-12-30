@@ -7,8 +7,7 @@
 
 #include "InputStream.hpp"
 #include "Stream.cpp"
-#define MAX_ITEMS 100
-#define PAGE_SIZE_ITEMS 1024
+#define MAX_ITEMS 1024
 
 class InputStream: public Stream {    
     bool EOS;
@@ -75,7 +74,6 @@ void InputStream::open(std::string file_to_open) {
     }
     else {
         std::cout << "opening file : " << file_to_open << std::endl;
-        this->file = file_to_open;
         this->fd = ::open(file_to_open.c_str(), O_RDONLY);
         std::cout << "obtained FD : " << getFD() << std::endl;
         
@@ -86,6 +84,7 @@ void InputStream::open(std::string file_to_open) {
     // clear info of previous streams
     this->total_mappings = 0;
     this->current_read = 0;
+    this->file = file_to_open;
     this->EOS = false;
 }
 
